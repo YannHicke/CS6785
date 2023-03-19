@@ -50,7 +50,9 @@ def conditional_loss_nonsaturating(g, d, x_real, y_real, *, device):
     y_fake = y_real  # use the real labels as the fake labels as well
 
     # YOUR CODE STARTS HERE
-    raise NotImplementedError
+    d_loss= F.binary_cross_entropy_with_logits(d(x_real),torch.ones(batch_size,device=device)) \
+      + F.binary_cross_entropy_with_logits(d(g(z)),torch.zeros(batch_size, device=device))
+    g_loss= -F.logsigmoid(d(g(torch.concat((z, y_fake), dim=1)))).mean()
     # YOUR CODE ENDS HERE
 
     return d_loss, g_loss

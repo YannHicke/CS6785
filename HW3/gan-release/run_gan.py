@@ -39,6 +39,8 @@ torchvision.utils.save_image((next(iter(data_loader))[0] + 1) / 2.,
 device = torch.device(args.device)
 g = codebase.network.Generator().to(device)
 d = codebase.network.Discriminator().to(device)
+g_cond = codebase.network.ConditionalGenerator.to(device)
+d_cond = codebase.network.ConditionalDiscriminator().to(device)
 z_test = torch.randn(100, g.dim_z).to(device)
 
 g_optimizer = torch.optim.Adam(g.parameters(), 1e-3, betas=(0.5, 0.999))
@@ -51,30 +53,22 @@ for _ in range(args.num_epochs):
 
         if args.loss_type == 'nonsaturating':
             loss = codebase.gan.loss_nonsaturating
+            d_loss, g_loss = loss(g, d, x_real, device=device)
         elif args.loss_type == 'wasserstein_gp':
             loss = codebase.gan.loss_wasserstein_gp
         else:
-            raise NotImplementedError
+            loss = codebase.gan.conditional_loss_nonsaturating
+            d_loss, g_loss = loss(g_cond, d_cond, x_real, y_real, device=device)
 
-        with torch.autograd.set_detect_anomaly(True):
-            d_loss, g_loss = loss(g, d, x_real, device=device)
+            
+
+        d_optimizer.zero_grad()
+        d_loss.backward(retain_graph=True)
+        g_optimizer.zero_grad()
+        g_loss.backward()
+        d_optimizer.step()
+        g_optimizer.step()
         
-            # d_optimizer.zero_grad()
-            # g_optimizer.step()
-            # d_loss.backward(retain_graph=True)
-            # d_optimizer.step()
-            # g_optimizer.zero_grad()
-            # g_loss.backward()
-            
-
-
-            d_optimizer.zero_grad()
-            d_loss.backward(retain_graph=True)
-            g_optimizer.zero_grad()
-            g_loss.backward()
-            d_optimizer.step()
-            g_optimizer.step()
-            
 
         global_step += 1
 
