@@ -1,0 +1,17 @@
+Collecting package metadata (current_repodata.json): ...working... done
+Solving environment: ...working... done
+
+## Package Plan ##
+
+  environment location: /opt/homebrew/Caskroom/miniforge/base
+
+  added / updated specs:
+    - pytorch
+
+
+The following packages will be UPDATED:
+
+  pytorch                        1.13.1-cpu_py310h7410233_0 --> 1.13.1-cpu_py310h32bc11d_1 
+
+
+Proceed ([y]/n)? 
